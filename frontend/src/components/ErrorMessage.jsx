@@ -19,7 +19,7 @@ function ErrorMessage({ message, onRetry }) {
               <div className="mt-3 space-y-2 text-xs">
                 <p className="font-semibold">Troubleshooting:</p>
                 <ul className="list-disc list-inside space-y-1 text-red-200">
-                  <li>Make sure the backend server is running on port 5000</li>
+                  <li>Make sure the backend server is running on port 3001</li>
                   <li>Check if MongoDB is connected</li>
                   <li>Verify your network connection</li>
                   <li>Check browser console for detailed errors</li>

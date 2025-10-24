@@ -15,9 +15,9 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  const login = async (email, password) => {
+  const login = async (emailOrUsername, password) => {
     try {
-      const data = await loginUser(email, password);
+      const data = await loginUser(emailOrUsername, password);
       setUser(data);
       localStorage.setItem("user", JSON.stringify(data));
       return data;
@@ -27,9 +27,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (email, password) => {
+  const signup = async (email, password, username) => {
     try {
-      const data = await signupUser(email, password);
+      const data = await signupUser(email, password, username);
       setUser(data);
       localStorage.setItem("user", JSON.stringify(data));
       return data;

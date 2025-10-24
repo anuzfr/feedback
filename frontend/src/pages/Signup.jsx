@@ -1,28 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ErrorMessage from "../components/ErrorMessage";
 
 function Signup() {
-  const { signup } = useAuth();
+  const { signup, user } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && user.token) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
     
     // Validation
-    if (!email || !password) {
+    if (!email || !username || !password) {
       setError("Please fill in all fields");
       return;
     }
     
     if (!/\S+@\S+\.\S+/.test(email)) {
       setError("Please enter a valid email address");
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      setError("Username must be 3-20 characters long and contain only letters, numbers, and underscores");
       return;
     }
     
@@ -34,7 +47,7 @@ function Signup() {
     setLoading(true);
     
     try {
-      await signup(email, password);
+      await signup(email, password, username);
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -57,6 +70,17 @@ function Signup() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+          />
+          <input
+            type="text"
+            placeholder="Username (3-20 characters, letters, numbers, _)"
+            className="w-full px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            required
+            minLength="3"
+            maxLength="20"
+            pattern="[a-zA-Z0-9_]{3,20}"
           />
           <input
             type="password"
