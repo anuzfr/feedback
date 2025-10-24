@@ -4,20 +4,39 @@ import { loginUser, signupUser } from "../api/authApi";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() =>
-    JSON.parse(localStorage.getItem("user")) || null
-  );
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error("Error parsing stored user:", error);
+      localStorage.removeItem("user");
+      return null;
+    }
+  });
 
   const login = async (email, password) => {
-    const data = await loginUser(email, password);
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
+    try {
+      const data = await loginUser(email, password);
+      setUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+      return data;
+    } catch (error) {
+      console.error("Login error in context:", error);
+      throw error;
+    }
   };
 
   const signup = async (email, password) => {
-    const data = await signupUser(email, password);
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
+    try {
+      const data = await signupUser(email, password);
+      setUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+      return data;
+    } catch (error) {
+      console.error("Signup error in context:", error);
+      throw error;
+    }
   };
 
   const logout = () => {

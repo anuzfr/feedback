@@ -1,19 +1,41 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ErrorMessage from "../components/ErrorMessage";
 
 function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    
+    // Validation
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+    
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    
+    setLoading(true);
+    
     try {
       await login(email, password);
-      window.location.href = "/dashboard";
-    } catch {
-      setError("Invalid email or password");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -25,23 +47,27 @@ function Login() {
           <input
             type="email"
             placeholder="Email"
-            className="w-full px-4 py-2 rounded-md bg-gray-700"
+            className="w-full px-4 py-2 rounded-md bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <input
             type="password"
             placeholder="Password"
-            className="w-full px-4 py-2 rounded-md bg-gray-700"
+            className="w-full px-4 py-2 rounded-md bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength="6"
           />
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && <ErrorMessage message={error} onRetry={() => setError("")} />}
           <button
             type="submit"
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold"
+            disabled={loading}
+            className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
         <p className="text-center text-gray-400 mt-4">
